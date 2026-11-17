@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDevUserId } from '@/shared/dev/devUser';
+import { useCurrentUser } from '@/shared/auth/session';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { Icon } from '@/shared/ui/Icon';
@@ -25,7 +25,7 @@ const RESULT: Record<
 
 export function QuizCard({ eventId }: { eventId: string }) {
   const navigate = useNavigate();
-  const userId = useDevUserId();
+  const userId = useCurrentUser().id;
   const [answer, setAnswer] = useState('');
   const { data: statusState } = useEventStatus(eventId);
   const submit = useSubmitAnswer(eventId);

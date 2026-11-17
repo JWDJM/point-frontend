@@ -150,9 +150,33 @@
   font-size: 12px;
 }
 
-.menuCheck {
-  margin-left: auto;
-  color: var(--brand);
+.menuItem:disabled {
+  opacity: 0.5;
+}
+
+.menuProfile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 6px;
+  min-width: 0;
+}
+
+.menuProfileText {
+  min-width: 0;
+}
+
+.menuProfileName {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.menuProfileEmail {
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .menuDivider {

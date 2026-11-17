@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDevUserId } from '@/shared/dev/devUser';
+import { useCurrentUser } from '@/shared/auth/session';
 import { newIdempotencyKey } from '@/shared/lib/idempotencyKey';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -16,7 +16,7 @@ const QUICK_AMOUNTS = [100, 500, 1000];
 type Done = { merchant: string; amount: number; balance: number };
 
 export function PayForm() {
-  const userId = useDevUserId();
+  const userId = useCurrentUser().id;
   const navigate = useNavigate();
   const { data: balance } = usePointBalance();
   const pay = useUsePoint();

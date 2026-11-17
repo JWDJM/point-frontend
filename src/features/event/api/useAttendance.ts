@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { apiClient, ERROR_CODES } from '@/shared/api/client';
-import { useDevUserId } from '@/shared/dev/devUser';
 
 export type AttendanceResult = 'ATTENDED' | 'ALREADY_ATTENDED' | 'MAINTENANCE';
 
@@ -21,12 +20,9 @@ export function toAttendanceResult(status: number, errorCode?: string): Attendan
 }
 
 export function useAttendance() {
-  const userId = useDevUserId();
   return useMutation({
     mutationFn: async (): Promise<AttendanceResult> => {
-      const { response, error } = await apiClient.POST('/api/events/attendance', {
-        params: { header: { 'X-User-Id': userId } },
-      });
+      const { response, error } = await apiClient.POST('/api/events/attendance');
       const code = error && 'code' in error ? (error.code as string | undefined) : undefined;
       return toAttendanceResult(response.status, code);
     },

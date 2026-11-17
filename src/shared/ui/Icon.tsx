@@ -21,6 +21,7 @@ const PATHS = {
   alert:
     'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
   x: 'M18 6 6 18M6 6l12 12',
+  logout: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9',
 } as const;
 
 export type IconName = keyof typeof PATHS;

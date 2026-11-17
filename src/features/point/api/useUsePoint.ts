@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/client';
-import { useDevUserId } from '@/shared/dev/devUser';
 
 export type UsePointResult =
   | { kind: 'USED'; balance: number }
@@ -29,12 +28,11 @@ export interface UsePointVariables {
 }
 
 export function useUsePoint() {
-  const userId = useDevUserId();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ amount, merchantRef, idempotencyKey }: UsePointVariables) => {
       const { response, data } = await apiClient.POST('/api/points/use', {
-        params: { header: { 'X-User-Id': userId, 'Idempotency-Key': idempotencyKey } },
+        params: { header: { 'Idempotency-Key': idempotencyKey } },
         body: { amount, merchantRef },
       });
       return toUsePointResult(response.status, data?.data?.balance);

@@ -1,15 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/client';
-import { useDevUserId } from '@/shared/dev/devUser';
+import { useCurrentUser } from '@/shared/auth/session';
 
 export function usePointBalance() {
-  const userId = useDevUserId();
+  const userId = useCurrentUser().id;
   return useQuery({
     queryKey: ['point', 'balance', userId],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/points/balance', {
-        params: { header: { 'X-User-Id': userId } },
-      });
+      const { data, error } = await apiClient.GET('/api/points/balance');
       if (error) throw error;
       return data?.data?.balance ?? 0;
     },

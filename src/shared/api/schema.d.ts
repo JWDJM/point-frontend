@@ -4,755 +4,993 @@
  */
 
 export interface paths {
-    "/api/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["LoginRequest"];
-                };
-            };
-            responses: {
-                /** @description 로그인 성공 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["LoginResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/api/auth/signup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/points/balance": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    /** 회원가입 (가입 즉시 로그인 — 응답은 로그인과 같다) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['SignupRequest'];
         };
-        get: {
-            parameters: {
-                query?: never;
-                header: {
-                    /** @description 로컬 개발용 임시 사용자 식별 (TODO: JWT 도입 시 제거) */
-                    "X-User-Id": components["parameters"]["DevUserId"];
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 잔액 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BalanceResponse"];
-                    };
-                };
-            };
+      };
+      responses: {
+        201: components['responses']['TokenIssued'];
+        /** @description 입력 형식 오류 (code=INVALID_REQUEST) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        /** @description 이미 가입된 이메일 (code=EMAIL_ALREADY_EXISTS, 대소문자 무시) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+      };
     };
-    "/api/points/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header: {
-                    /** @description 로컬 개발용 임시 사용자 식별 (TODO: JWT 도입 시 제거) */
-                    "X-User-Id": components["parameters"]["DevUserId"];
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 최근 거래 내역 20건 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["HistoryResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/points/use": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['LoginRequest'];
         };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header: {
-                    /** @description 로컬 개발용 임시 사용자 식별 (TODO: JWT 도입 시 제거) */
-                    "X-User-Id": components["parameters"]["DevUserId"];
-                    /** @description 요청마다 새로 만든 UUID. 같은 키로 재요청하면 다시 차감하지 않는다 (사용자별로 구분, 최대 64자) */
-                    "Idempotency-Key": string;
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UsePointRequest"];
-                };
-            };
-            responses: {
-                /** @description 사용 완료 (data.balance = 처리 후 잔액) */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BalanceResponse"];
-                    };
-                };
-                /** @description Idempotency-Key 누락·형식 오류 (code=INVALID_REQUEST) */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description 잔액 부족 (code=INSUFFICIENT_BALANCE) */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
+      };
+      responses: {
+        200: components['responses']['TokenIssued'];
+        /** @description 이메일 또는 비밀번호 불일치 (code=INVALID_CREDENTIALS — 어느 쪽이 틀렸는지 구분하지 않는다) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
-    "/api/events/{eventId}/answers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header: {
-                    /** @description 로컬 개발용 임시 사용자 식별 (TODO: JWT 도입 시 제거) */
-                    "X-User-Id": components["parameters"]["DevUserId"];
-                };
-                path: {
-                    eventId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["QuizAnswerRequest"];
-                };
-            };
-            responses: {
-                /** @description 낙첨 (code=LOST) */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ResultResponse"];
-                    };
-                };
-                /** @description 당첨 (code=WON, 지급 예정 — 원장 반영은 비동기) */
-                202: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ResultResponse"];
-                    };
-                };
-                /** @description 중복 참여 (code=DUPLICATE) */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ResultResponse"];
-                    };
-                };
-                /** @description 이벤트 없음/마감 (code=CLOSED) */
-                410: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ResultResponse"];
-                    };
-                };
-                503: components["responses"]["EventUnavailable"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/events/attendance": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    /** access token 재발급 (refresh 쿠키 사용, 쓴 refresh token 은 폐기되고 새 쿠키가 내려간다) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['TokenIssued'];
+        /** @description 쿠키 없음·만료·이미 사용·로그아웃됨 (code=INVALID_REFRESH_TOKEN) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
         };
-        get?: never;
-        put?: never;
-        /** 출석체크 (KST 기준 1일 1회) */
-        post: {
-            parameters: {
-                query?: never;
-                header: {
-                    /** @description 로컬 개발용 임시 사용자 식별 (TODO: JWT 도입 시 제거) */
-                    "X-User-Id": components["parameters"]["DevUserId"];
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 출석 완료 (code=ATTENDED, 지급 예정 — 원장 반영은 비동기) */
-                202: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["AttendanceResponse"];
-                    };
-                };
-                /** @description 오늘 이미 출석 (code=ALREADY_ATTENDED) */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["AttendanceResponse"];
-                    };
-                };
-                503: components["responses"]["EventUnavailable"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
-    "/api/events/{eventId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 이벤트 현황 (local 프로필 전용 — 운영에서는 404) */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    eventId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 현황 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["EventStatusResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/events/{eventId}/open": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    /** 로그아웃 (refresh token 폐기 + 쿠키 삭제). 쿠키가 없어도 200 */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 로그아웃 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
         };
-        get?: never;
-        put?: never;
-        /** 이벤트 열기/초기화 (local 프로필 전용) */
-        post: {
-            parameters: {
-                query?: {
-                    stock?: number;
-                    amount?: number;
-                };
-                header?: never;
-                path: {
-                    eventId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 초기화 후 현황 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["EventStatusResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
-    "/api/system/info": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** monolith 인스턴스·DB·Kafka 상태 (운영/인프라 검증용, OPS_API_ENABLED=false 면 비활성) */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 구성요소가 죽어 있어도 200 — 각 status(UP/DOWN/DISABLED) 로 구분 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["MonolithSystemInfoResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/jwks.json': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/system/whoami": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 응답한 monolith 인스턴스 정보만 (부하 분산 확인용, 외부 점검 없음) */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
+    /** JWT 검증용 공개키 (JWKS). local 에서 event-service 가 사용 */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description JWK Set */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              keys?: {
+                [key: string]: unknown;
+              }[];
             };
-            requestBody?: never;
-            responses: {
-                /** @description 인스턴스 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InstanceInfoResponse"];
-                    };
-                };
-            };
+          };
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
-    "/api/events/system/whoami": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 응답한 event-service 인스턴스 정보만 (부하 분산 확인용, 외부 점검 없음) */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 인스턴스 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InstanceInfoResponse"];
-                    };
-                };
-                503: components["responses"]["EventUnavailable"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/users/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/system/ledger": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 내 정보 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['UserProfileResponse'];
+          };
         };
-        /** 원장 집계 + 전체 사용자 최근 활동 (운영/인프라 검증용) */
-        get: {
-            parameters: {
-                query?: {
-                    recent?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 집계 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["LedgerStatsResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        401: components['responses']['Unauthorized'];
+      };
     };
-    "/api/events/system/info": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** event-service 인스턴스·Redis·Kafka 상태 (ALB 경로 라우팅을 그대로 탐 / DR 모드에서는 503 EVENT_MAINTENANCE) */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description 구성요소가 죽어 있어도 200 — 각 status 로 구분 */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["EventSystemInfoResponse"];
-                    };
-                };
-                503: components["responses"]["EventUnavailable"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/points/balance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 잔액 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['BalanceResponse'];
+          };
+        };
+        401: components['responses']['Unauthorized'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/points/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 최근 거래 내역 20건 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['HistoryResponse'];
+          };
+        };
+        401: components['responses']['Unauthorized'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/points/use': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header: {
+          /** @description 요청마다 새로 만든 UUID. 같은 키로 재요청하면 다시 차감하지 않는다 (사용자별로 구분, 최대 64자) */
+          'Idempotency-Key': string;
+        };
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['UsePointRequest'];
+        };
+      };
+      responses: {
+        /** @description 사용 완료 (data.balance = 처리 후 잔액) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['BalanceResponse'];
+          };
+        };
+        /** @description Idempotency-Key 누락·형식 오류 (code=INVALID_REQUEST) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+        401: components['responses']['Unauthorized'];
+        /** @description 잔액 부족 (code=INSUFFICIENT_BALANCE) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/events/{eventId}/answers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['QuizAnswerRequest'];
+        };
+      };
+      responses: {
+        /** @description 낙첨 (code=LOST) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ResultResponse'];
+          };
+        };
+        /** @description 당첨 (code=WON, 지급 예정 — 원장 반영은 비동기) */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ResultResponse'];
+          };
+        };
+        401: components['responses']['Unauthorized'];
+        /** @description 중복 참여 (code=DUPLICATE) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ResultResponse'];
+          };
+        };
+        /** @description 이벤트 없음/마감 (code=CLOSED) */
+        410: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ResultResponse'];
+          };
+        };
+        503: components['responses']['EventUnavailable'];
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/events/attendance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 출석체크 (KST 기준 1일 1회) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 출석 완료 (code=ATTENDED, 지급 예정 — 원장 반영은 비동기) */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AttendanceResponse'];
+          };
+        };
+        401: components['responses']['Unauthorized'];
+        /** @description 오늘 이미 출석 (code=ALREADY_ATTENDED) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AttendanceResponse'];
+          };
+        };
+        503: components['responses']['EventUnavailable'];
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/events/{eventId}/status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 이벤트 현황 (local 프로필 전용 — 운영에서는 404) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 현황 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['EventStatusResponse'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/events/{eventId}/open': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 이벤트 열기/초기화 (local 프로필 전용) */
+    post: {
+      parameters: {
+        query?: {
+          stock?: number;
+          amount?: number;
+        };
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 초기화 후 현황 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['EventStatusResponse'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/system/info': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** monolith 인스턴스·DB·Kafka 상태 (운영/인프라 검증용, OPS_API_ENABLED=false 면 비활성) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 구성요소가 죽어 있어도 200 — 각 status(UP/DOWN/DISABLED) 로 구분 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['MonolithSystemInfoResponse'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/system/whoami': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 응답한 monolith 인스턴스 정보만 (부하 분산 확인용, 외부 점검 없음) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 인스턴스 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['InstanceInfoResponse'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/events/system/whoami': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 응답한 event-service 인스턴스 정보만 (부하 분산 확인용, 외부 점검 없음) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 인스턴스 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['InstanceInfoResponse'];
+          };
+        };
+        503: components['responses']['EventUnavailable'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/system/ledger': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 원장 집계 + 전체 사용자 최근 활동 (운영/인프라 검증용) */
+    get: {
+      parameters: {
+        query?: {
+          recent?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 집계 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LedgerStatsResponse'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/events/system/info': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** event-service 인스턴스·Redis·Kafka 상태 (ALB 경로 라우팅을 그대로 탐 / DR 모드에서는 503 EVENT_MAINTENANCE) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 구성요소가 죽어 있어도 200 — 각 status 로 구분 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['EventSystemInfoResponse'];
+          };
+        };
+        503: components['responses']['EventUnavailable'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        LoginRequest: {
-            /** Format: email */
-            email: string;
-            password: string;
-        };
-        LoginResponse: {
-            code?: string;
-            data?: {
-                accessToken?: string;
-            };
-        };
-        BalanceResponse: {
-            code?: string;
-            data?: {
-                /** Format: int64 */
-                balance?: number;
-            };
-        };
-        UsePointRequest: {
-            /** Format: int64 */
-            amount: number;
-            merchantRef: string;
-        };
-        QuizAnswerRequest: {
-            answer: string;
-        };
-        LedgerEntry: {
-            /** Format: int64 */
-            id?: number;
-            /** @enum {string} */
-            type?: "EARN" | "USE" | "REFUND" | "EXPIRE" | "CANCEL";
-            /** Format: int64 */
-            amount?: number;
-            /** Format: int64 */
-            balanceAfter?: number;
-            source?: string;
-            referenceId?: string | null;
-            /** Format: date-time */
-            createdAt?: string;
-        };
-        HistoryResponse: {
-            code?: string;
-            data?: components["schemas"]["LedgerEntry"][];
-        };
-        ResultResponse: {
-            /** @enum {string} */
-            code?: "WON" | "LOST" | "DUPLICATE" | "CLOSED";
-        };
-        AttendanceResponse: {
-            /** @enum {string} */
-            code?: "ATTENDED" | "ALREADY_ATTENDED";
-        };
-        ErrorResponse: {
-            /** @example EVENT_MAINTENANCE */
-            code?: string;
-            message?: string;
-        };
-        EventStatusResponse: {
-            code?: string;
-            data?: {
-                eventId: string;
-                open: boolean;
-                /** Format: int64 */
-                remainingStock: number;
-                /**
-                 * Format: int64
-                 * @description 당첨 시 지급 포인트
-                 */
-                rewardAmount: number;
-                /** Format: int64 */
-                participants: number;
-                /** Format: int64 */
-                winners: number;
-            };
-        };
-        InstanceInfo: {
-            /** @example monolith */
-            service: string;
-            /** @description 응답한 인스턴스 (K8s 에서는 Pod 이름) */
-            instance: string;
-            profiles: string[];
-            drMode: boolean;
-            kafkaEnabled: boolean;
-            /** Format: date-time */
-            startedAt: string;
-            /** Format: int64 */
-            uptimeSeconds: number;
-            javaVersion: string;
-        };
-        InstanceInfoResponse: {
-            code?: string;
-            data?: components["schemas"]["InstanceInfo"];
-        };
-        ComponentStatus: {
-            /** @enum {string} */
-            status: "UP" | "DOWN" | "DISABLED";
-            /** Format: int64 */
-            latencyMs?: number | null;
-            /** @description 구성요소별 정보.
-             *     database: version, database, serverAddress, inRecovery, heartbeatAt, heartbeatLagSeconds
-             *     redis: ping, pingMs, version, mode, role, connectedClients, usedMemory, keys
-             *     kafka(monolith): clusterId, brokers, topic, consumerGroup, assignedPartitions, consumerLag
-             *     kafka(event-service): clusterId, brokers, topic, topicExists, partitions, publishedOffsetTotal
-             *      */
-            details: {
-                [key: string]: unknown;
-            };
-            error?: string | null;
-        };
-        MonolithSystemInfoResponse: {
-            code?: string;
-            data?: {
-                instance: components["schemas"]["InstanceInfo"];
-                database: components["schemas"]["ComponentStatus"];
-                kafka: components["schemas"]["ComponentStatus"];
-            };
-        };
-        EventSystemInfoResponse: {
-            code?: string;
-            data?: {
-                instance: components["schemas"]["InstanceInfo"];
-                redis: components["schemas"]["ComponentStatus"];
-                kafka: components["schemas"]["ComponentStatus"];
-            };
-        };
-        LedgerActivity: {
-            /** Format: int64 */
-            id: number;
-            /** Format: int64 */
-            userId: number;
-            type: string;
-            /** Format: int64 */
-            amount: number;
-            /** Format: int64 */
-            balanceAfter: number;
-            source: string;
-            referenceId?: string | null;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        LedgerStatsResponse: {
-            code?: string;
-            data?: {
-                /** Format: int64 */
-                walletCount: number;
-                /** Format: int64 */
-                totalBalance: number;
-                /** Format: int64 */
-                ledgerCount: number;
-                bySource: {
-                    source: string;
-                    type: string;
-                    /** Format: int64 */
-                    count: number;
-                    /** Format: int64 */
-                    totalAmount: number;
-                }[];
-                /** Format: date-time */
-                lastEventRewardAt?: string | null;
-                recent: components["schemas"]["LedgerActivity"][];
-            };
-        };
+  schemas: {
+    SignupRequest: {
+      /**
+       * Format: email
+       * @description 앞뒤 공백 제거 후 소문자로 저장
+       */
+      email: string;
+      /** @description 영문·숫자 포함 8~64자 (공백 제외 ASCII) */
+      password: string;
+      name: string;
     };
-    responses: {
-        /** @description 이벤트 일시 불가. code 로 구분한다.
-         *     - EVENT_MAINTENANCE: DR 모드 점검 (Gateway → maintenance 응답, ADR-0004·0014)
-         *     - EVENT_RETRY: 보상 발행 실패. 참여 기록은 되돌려졌으므로 잠시 후 같은 요청을 다시 보내면 된다
-         *      */
-        EventUnavailable: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorResponse"];
-            };
-        };
+    LoginRequest: {
+      /** Format: email */
+      email: string;
+      password: string;
     };
-    parameters: {
-        /** @description 로컬 개발용 임시 사용자 식별 (TODO: JWT 도입 시 제거) */
-        DevUserId: number;
+    UserProfile: {
+      /** Format: int64 */
+      id: number;
+      email: string;
+      name: string;
+      /** Format: date-time */
+      createdAt: string;
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    UserProfileResponse: {
+      code?: string;
+      data?: components['schemas']['UserProfile'];
+    };
+    TokenResponse: {
+      code?: string;
+      data?: {
+        accessToken: string;
+        /** @enum {string} */
+        tokenType: 'Bearer';
+        /**
+         * Format: int64
+         * @description access token 남은 수명(초)
+         */
+        expiresIn: number;
+        user: components['schemas']['UserProfile'];
+      };
+    };
+    BalanceResponse: {
+      code?: string;
+      data?: {
+        /** Format: int64 */
+        balance?: number;
+      };
+    };
+    UsePointRequest: {
+      /** Format: int64 */
+      amount: number;
+      merchantRef: string;
+    };
+    QuizAnswerRequest: {
+      answer: string;
+    };
+    LedgerEntry: {
+      /** Format: int64 */
+      id?: number;
+      /** @enum {string} */
+      type?: 'EARN' | 'USE' | 'REFUND' | 'EXPIRE' | 'CANCEL';
+      /** Format: int64 */
+      amount?: number;
+      /** Format: int64 */
+      balanceAfter?: number;
+      source?: string;
+      referenceId?: string | null;
+      /** Format: date-time */
+      createdAt?: string;
+    };
+    HistoryResponse: {
+      code?: string;
+      data?: components['schemas']['LedgerEntry'][];
+    };
+    ResultResponse: {
+      /** @enum {string} */
+      code?: 'WON' | 'LOST' | 'DUPLICATE' | 'CLOSED';
+    };
+    AttendanceResponse: {
+      /** @enum {string} */
+      code?: 'ATTENDED' | 'ALREADY_ATTENDED';
+    };
+    ErrorResponse: {
+      /** @example EVENT_MAINTENANCE */
+      code?: string;
+      message?: string;
+    };
+    EventStatusResponse: {
+      code?: string;
+      data?: {
+        eventId: string;
+        open: boolean;
+        /** Format: int64 */
+        remainingStock: number;
+        /**
+         * Format: int64
+         * @description 당첨 시 지급 포인트
+         */
+        rewardAmount: number;
+        /** Format: int64 */
+        participants: number;
+        /** Format: int64 */
+        winners: number;
+      };
+    };
+    InstanceInfo: {
+      /** @example monolith */
+      service: string;
+      /** @description 응답한 인스턴스 (K8s 에서는 Pod 이름) */
+      instance: string;
+      profiles: string[];
+      drMode: boolean;
+      kafkaEnabled: boolean;
+      /** Format: date-time */
+      startedAt: string;
+      /** Format: int64 */
+      uptimeSeconds: number;
+      javaVersion: string;
+    };
+    InstanceInfoResponse: {
+      code?: string;
+      data?: components['schemas']['InstanceInfo'];
+    };
+    ComponentStatus: {
+      /** @enum {string} */
+      status: 'UP' | 'DOWN' | 'DISABLED';
+      /** Format: int64 */
+      latencyMs?: number | null;
+      /** @description 구성요소별 정보.
+       *     database: version, database, serverAddress, inRecovery, heartbeatAt, heartbeatLagSeconds
+       *     redis: ping, pingMs, version, mode, role, connectedClients, usedMemory, keys
+       *     kafka(monolith): clusterId, brokers, topic, consumerGroup, assignedPartitions, consumerLag
+       *     kafka(event-service): clusterId, brokers, topic, topicExists, partitions, publishedOffsetTotal
+       *      */
+      details: {
+        [key: string]: unknown;
+      };
+      error?: string | null;
+    };
+    MonolithSystemInfoResponse: {
+      code?: string;
+      data?: {
+        instance: components['schemas']['InstanceInfo'];
+        database: components['schemas']['ComponentStatus'];
+        kafka: components['schemas']['ComponentStatus'];
+      };
+    };
+    EventSystemInfoResponse: {
+      code?: string;
+      data?: {
+        instance: components['schemas']['InstanceInfo'];
+        redis: components['schemas']['ComponentStatus'];
+        kafka: components['schemas']['ComponentStatus'];
+      };
+    };
+    LedgerActivity: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      userId: number;
+      type: string;
+      /** Format: int64 */
+      amount: number;
+      /** Format: int64 */
+      balanceAfter: number;
+      source: string;
+      referenceId?: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    LedgerStatsResponse: {
+      code?: string;
+      data?: {
+        /** Format: int64 */
+        walletCount: number;
+        /** Format: int64 */
+        totalBalance: number;
+        /** Format: int64 */
+        ledgerCount: number;
+        bySource: {
+          source: string;
+          type: string;
+          /** Format: int64 */
+          count: number;
+          /** Format: int64 */
+          totalAmount: number;
+        }[];
+        /** Format: date-time */
+        lastEventRewardAt?: string | null;
+        recent: components['schemas']['LedgerActivity'][];
+      };
+    };
+  };
+  responses: {
+    /** @description access token 없음·만료·위조 (code=UNAUTHORIZED) → 프론트는 /api/auth/refresh 후 재시도, 실패하면 로그인 화면 */
+    Unauthorized: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ErrorResponse'];
+      };
+    };
+    /** @description 로그인 성공. 본문 = access token (메모리에만 보관), Set-Cookie = point_refresh (HttpOnly, SameSite=Strict, Path=/api/auth) */
+    TokenIssued: {
+      headers: {
+        /** @description point_refresh=...; HttpOnly; SameSite=Strict; Path=/api/auth */
+        'Set-Cookie'?: string;
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['TokenResponse'];
+      };
+    };
+    /** @description 이벤트 일시 불가. code 로 구분한다.
+     *     - EVENT_MAINTENANCE: DR 모드 점검 (Gateway → maintenance 응답, ADR-0004·0014)
+     *     - EVENT_RETRY: 보상 발행 실패. 참여 기록은 되돌려졌으므로 잠시 후 같은 요청을 다시 보내면 된다
+     *      */
+    EventUnavailable: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ErrorResponse'];
+      };
+    };
+  };
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

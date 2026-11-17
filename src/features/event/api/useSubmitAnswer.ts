@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { apiClient, ERROR_CODES } from '@/shared/api/client';
-import { useDevUserId } from '@/shared/dev/devUser';
 
 export type AnswerResult = 'WON' | 'LOST' | 'DUPLICATE' | 'CLOSED' | 'MAINTENANCE';
 
@@ -24,11 +23,10 @@ export function toAnswerResult(status: number, errorCode?: string): AnswerResult
 }
 
 export function useSubmitAnswer(eventId: string) {
-  const userId = useDevUserId();
   return useMutation({
     mutationFn: async (answer: string): Promise<AnswerResult> => {
       const { response, error } = await apiClient.POST('/api/events/{eventId}/answers', {
-        params: { path: { eventId }, header: { 'X-User-Id': userId } },
+        params: { path: { eventId } },
         body: { answer },
       });
       const code = error && 'code' in error ? (error.code as string | undefined) : undefined;

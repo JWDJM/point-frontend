@@ -19,7 +19,8 @@ npm run gen:api           # point-backend 가 형제 폴더에 있어야 함 (�
 
 ## 로컬 연결 방식
 - `vite.config.ts` proxy: `/api/events/**` → `:8081`, 나머지 `/api/**` → `:8080` (운영 ALB 경로 라우팅과 동일, CORS 불필요)
-- 인증 전 임시: 상단 **테스트 사용자** 선택값이 `X-User-Id` 헤더로 전송됨 (`src/shared/dev/`)
+- 인증: `/login`, `/signup`. access token 은 메모리에만(`src/shared/auth/session.ts`), refresh token 은 HttpOnly 쿠키. 새로고침 시 쿠키로 복원, 401 이면 재발급 후 1회 재시도 (`src/shared/api/client.ts`)
+- 로컬 데모 계정: `demo1~5@point.local` / `demo1234!`
 
 ## 구조
 ```

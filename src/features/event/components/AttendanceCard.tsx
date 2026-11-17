@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useDevUserId } from '@/shared/dev/devUser';
+import { useCurrentUser } from '@/shared/auth/session';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { Icon } from '@/shared/ui/Icon';
@@ -11,7 +11,7 @@ import styles from './event.module.css';
 const ATTENDANCE_REWARD = 10;
 
 export function AttendanceCard() {
-  const userId = useDevUserId();
+  const userId = useCurrentUser().id;
   const attendance = useAttendance();
   const { reset } = attendance;
 
