@@ -572,6 +572,51 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 서비스 이용 가능 여부 (인증 불필요, OPS_API_ENABLED 와 무관하게 항상 켜짐). 프론트 점검 화면 판단·회복 확인용 */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description 이용 가능 (data.status=UP) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['HealthResponse'];
+          };
+        };
+        /** @description DB 등 핵심 구성요소 불가 (code=SERVICE_UNAVAILABLE) */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/system/info': {
     parameters: {
       query?: never;
@@ -799,6 +844,13 @@ export interface components {
          */
         expiresIn: number;
         user: components['schemas']['UserProfile'];
+      };
+    };
+    HealthResponse: {
+      code?: string;
+      data?: {
+        /** @enum {string} */
+        status?: 'UP';
       };
     };
     BalanceResponse: {
