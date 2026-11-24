@@ -215,11 +215,11 @@ React 18 + Vite + TypeScript SPA. 운영에서는 `web` 컨테이너(nginx)로 �
 
 ## API 연동
 - API 타입은 `point-backend/api/openapi.yaml` 에서 `npm run gen:api` 로 **생성**한다. `src/shared/api/schema.d.ts` 를 직접 수정하거나 응답 타입을 손으로 작성하지 않는다.
-- API 호출은 `src/shared/api/client.ts` 를 거친다. 호스트·포트를 하드코딩하지 않고 `/api/**` 상대 경로를 쓴다 (로컬은 `vite.config.ts` proxy).
+- API 호출은 `src/shared/api/client.ts` 를 거친다. 호스트·포트를 하드코딩하지 않고 `/api/**` 경로와 `API_BASE_URL`(`src/shared/api/baseUrl.ts`, `VITE_API_BASE_URL`)을 쓴다 (로컬은 `vite.config.ts` proxy).
 
 ## 인증
 - access token 은 **메모리에만** 둔다 (`src/shared/auth/session.ts`). `localStorage` / `sessionStorage` 에 저장하지 않는다. refresh token 은 HttpOnly 쿠키이므로 JS에서 다루지 않는다.
 
 ## 구조
-- `pages/` 는 화면 조립만, 도메인 로직은 `features/{auth,asset,point,event,cs}` 의 `{api, components, hooks}` 에 둔다. `shared/` 는 도메인을 모른다.
+- `pages/` 는 화면 조립만, 도메인 로직은 `features/{auth,asset,point,event,cs,system}` 의 `{api, components, hooks}` 에 둔다. `shared/` 는 도메인을 모른다.
 - DR 중 이벤트 API의 `503 EVENT_MAINTENANCE` 응답은 점검 배너(`features/event/components/MaintenanceBanner.tsx`)로 처리하는 동작을 유지한다.
