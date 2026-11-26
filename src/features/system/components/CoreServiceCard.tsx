@@ -1,6 +1,6 @@
 import { Badge } from '@/shared/ui/Badge';
 import { Card } from '@/shared/ui/Card';
-import { useMonolithInfo } from '../api/useSystemInfo';
+import { useCoreServiceInfo } from '../api/useSystemInfo';
 import { useLatencyHistory } from '../hooks/useLatencyHistory';
 import { ComponentPanel } from './ComponentPanel';
 import { InstanceSummary } from './InstanceSummary';
@@ -8,8 +8,8 @@ import { LatencySparkline } from './LatencySparkline';
 import { detailNumber, detailString, formatUptime, heartbeatTone } from './systemMetrics';
 import styles from './system.module.css';
 
-export function MonolithCard() {
-  const { data, isLoading, isError, dataUpdatedAt } = useMonolithInfo();
+export function CoreServiceCard() {
+  const { data, isLoading, isError, dataUpdatedAt } = useCoreServiceInfo();
   const samples = useLatencyHistory(data?.latencyMs, dataUpdatedAt);
   // 폴링 실패 시 이전 data 가 남아 있어도 "정상" 으로 그리지 않는다
   const info = !isError && data?.kind === 'OK' ? data.info : undefined;
@@ -33,7 +33,7 @@ export function MonolithCard() {
   const consumerLag = detailNumber(kafka?.details, 'consumerLag');
 
   return (
-    <Card title="monolith" subtitle="포인트 · 사용자 · :8080" action={head}>
+    <Card title="core-service" subtitle="포인트 · 사용자 · :8080" action={head}>
       {isLoading && <p className={styles.hint}>상태 조회 중…</p>}
       {isError && (
         <div className={styles.down} role="alert">

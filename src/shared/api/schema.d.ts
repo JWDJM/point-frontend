@@ -409,7 +409,7 @@ export interface paths {
             'application/json': components['schemas']['ResultResponse'];
           };
         };
-        /** @description 당첨 (code=WON, 지급 예정 — 이벤트 종료 후 일괄 정산으로 지급, ADR-0017) */
+        /** @description 당첨 (code=WON, 지급 예정 — 원장 반영은 비동기) */
         202: {
           headers: {
             [name: string]: unknown;
@@ -572,117 +572,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/admin/events/{eventId}/settlement': {
-    parameters: {
-      query?: never;
-      header: {
-        /** @description ADMIN_API_TOKEN (운영 Job·DR 런북 전용) */
-        'X-Admin-Token': string;
-      };
-      path: {
-        eventId: string;
-      };
-      cookie?: never;
-    };
-    /** 퀴즈 이벤트 정산 현황 (DR 판정 기준과 동일: NOT_SETTLED / COMPLETE / INCOMPLETE) */
-    get: {
-      parameters: {
-        query?: never;
-        header: {
-          /** @description ADMIN_API_TOKEN (운영 Job·DR 런북 전용) */
-          'X-Admin-Token': string;
-        };
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description 현황 */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SettlementStatusResponse'];
-          };
-        };
-        /** @description 관리자 토큰 없음·불일치 (code=FORBIDDEN) */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ErrorResponse'];
-          };
-        };
-      };
-    };
-    put?: never;
-    /** 퀴즈 이벤트 일괄 정산 (한 트랜잭션, 멱등). 이미 정산된 이벤트면 원장에 없는 대기 건만 채운다 (DR 재정산) */
-    post: {
-      parameters: {
-        query?: never;
-        header: {
-          /** @description ADMIN_API_TOKEN (운영 Job·DR 런북 전용) */
-          'X-Admin-Token': string;
-        };
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': components['schemas']['SettleRequest'];
-        };
-      };
-      responses: {
-        /** @description 정산 결과 */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SettlementResultResponse'];
-          };
-        };
-        /** @description 최초 정산인데 expectedCount 없음 (code=INVALID_REQUEST) */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ErrorResponse'];
-          };
-        };
-        /** @description 관리자 토큰 없음·불일치 (code=FORBIDDEN) */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ErrorResponse'];
-          };
-        };
-        /** @description 대기 건수 ≠ expectedCount — Kafka 반영 중인 당첨이 남음, 잠시 후 재시도 (code=SETTLEMENT_NOT_READY) */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ErrorResponse'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/api/health': {
     parameters: {
       query?: never;
@@ -735,7 +624,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** monolith 인스턴스·DB·Kafka 상태 (운영/인프라 검증용, OPS_API_ENABLED=false 면 비활성) */
+    /** core-service 인스턴스·DB·Kafka 상태 (운영/인프라 검증용, OPS_API_ENABLED=false 면 비활성) */
     get: {
       parameters: {
         query?: never;
@@ -751,7 +640,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            'application/json': components['schemas']['MonolithSystemInfoResponse'];
+            'application/json': components['schemas']['CoreServiceSystemInfoResponse'];
           };
         };
       };
@@ -771,7 +660,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** 응답한 monolith 인스턴스 정보만 (부하 분산 확인용, 외부 점검 없음) */
+    /** 응답한 core-service 인스턴스 정보만 (부하 분산 확인용, 외부 점검 없음) */
     get: {
       parameters: {
         query?: never;
@@ -1005,63 +894,6 @@ export interface components {
       /** @enum {string} */
       code?: 'ATTENDED' | 'ALREADY_ATTENDED';
     };
-    SettleRequest: {
-      /**
-       * Format: int64
-       * @description 최초 정산 시 필수: event-service 당첨자 수 (Redis SCARD event:{id}:winners)
-       */
-      expectedCount?: number;
-    };
-    SettlementResultResponse: {
-      code?: string;
-      data?: {
-        eventId: string;
-        /**
-         * Format: int64
-         * @description 정산 대상 건수 (최초 정산 시 확정)
-         */
-        rowCount: number;
-        /** Format: int64 */
-        totalAmount: number;
-        /**
-         * Format: int64
-         * @description 이번 호출로 새로 원장에 들어간 건수 (재실행이면 0)
-         */
-        appliedNow: number;
-        /** @description 이미 정산된 이벤트의 누락분을 채운 호출이면 true */
-        repaired: boolean;
-        /** Format: date-time */
-        settledAt: string;
-      };
-    };
-    SettlementStatusResponse: {
-      code?: string;
-      data?: {
-        eventId: string;
-        /** @enum {string} */
-        state: 'NOT_SETTLED' | 'COMPLETE' | 'INCOMPLETE';
-        /** Format: int64 */
-        pendingCount: number;
-        /** Format: int64 */
-        pendingAmount: number;
-        /**
-         * Format: int64
-         * @description 이 이벤트로 원장에 적립된 건수
-         */
-        ledgerCount: number;
-        /**
-         * Format: int64
-         * @description 원장에 아직 없는 대기 건수
-         */
-        unappliedCount: number;
-        /** Format: int64 */
-        settledRowCount?: number | null;
-        /** Format: int64 */
-        settledTotalAmount?: number | null;
-        /** Format: date-time */
-        settledAt?: string | null;
-      };
-    };
     ErrorResponse: {
       /** @example EVENT_MAINTENANCE */
       code?: string;
@@ -1086,7 +918,7 @@ export interface components {
       };
     };
     InstanceInfo: {
-      /** @example monolith */
+      /** @example core-service */
       service: string;
       /** @description 응답한 인스턴스 (K8s 에서는 Pod 이름) */
       instance: string;
@@ -1112,7 +944,7 @@ export interface components {
        * @description 구성요소별 정보.
        *     database: version, database, serverAddress, inRecovery, heartbeatAt, heartbeatLagSeconds
        *     redis: ping, pingMs, version, mode, role, connectedClients, usedMemory, keys
-       *     kafka(monolith): clusterId, brokers, topic, consumerGroup, assignedPartitions, consumerLag
+       *     kafka(core-service): clusterId, brokers, topic, consumerGroup, assignedPartitions, consumerLag
        *     kafka(event-service): clusterId, brokers, topic, topicExists, partitions, publishedOffsetTotal
        */
       details: {
@@ -1120,7 +952,7 @@ export interface components {
       };
       error?: string | null;
     };
-    MonolithSystemInfoResponse: {
+    CoreServiceSystemInfoResponse: {
       code?: string;
       data?: {
         instance: components['schemas']['InstanceInfo'];

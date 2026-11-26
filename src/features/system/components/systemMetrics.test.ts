@@ -74,9 +74,9 @@ describe('deriveTopology', () => {
   it('모두 정상', () => {
     expect(
       deriveTopology({
-        monolith: 'OK',
+        core: 'OK',
         database: 'UP',
-        monolithKafka: 'UP',
+        coreKafka: 'UP',
         event: 'OK',
         redis: 'UP',
         eventKafka: 'UP',
@@ -84,7 +84,7 @@ describe('deriveTopology', () => {
     ).toEqual({
       browser: 'UP',
       gateway: 'UP',
-      monolith: 'UP',
+      core: 'UP',
       event: 'UP',
       database: 'UP',
       kafka: 'UP',
@@ -94,9 +94,9 @@ describe('deriveTopology', () => {
 
   it('DR 모드: event-service 는 점검, Kafka 는 비활성, DB 는 정상', () => {
     const t = deriveTopology({
-      monolith: 'OK',
+      core: 'OK',
       database: 'UP',
-      monolithKafka: 'DISABLED',
+      coreKafka: 'DISABLED',
       event: 'MAINTENANCE',
     });
     expect(t.event).toBe('MAINTENANCE');
@@ -106,22 +106,21 @@ describe('deriveTopology', () => {
     expect(t.gateway).toBe('UP');
   });
 
-  it('monolith 가 죽으면 DB 상태는 알 수 없다', () => {
-    const t = deriveTopology({ monolith: 'ERROR', event: 'OK', redis: 'UP', eventKafka: 'DOWN' });
-    expect(t.monolith).toBe('DOWN');
+  it('core-service 가 죽으면 DB 상태는 알 수 없다', () => {
+    const t = deriveTopology({ core: 'ERROR', event: 'OK', redis: 'UP', eventKafka: 'DOWN' });
+    expect(t.core).toBe('DOWN');
     expect(t.database).toBe('UNKNOWN');
     expect(t.kafka).toBe('DOWN');
   });
 
   it('응답이 끊긴 서비스의 Kafka 점검 값은 쓰지 않는다', () => {
     expect(
-      deriveTopology({ monolith: 'OK', monolithKafka: 'UP', event: 'ERROR', eventKafka: 'DOWN' })
-        .kafka,
+      deriveTopology({ core: 'OK', coreKafka: 'UP', event: 'ERROR', eventKafka: 'DOWN' }).kafka,
     ).toBe('UP');
     expect(
       deriveTopology({
-        monolith: 'ERROR',
-        monolithKafka: 'UP',
+        core: 'ERROR',
+        coreKafka: 'UP',
         event: 'ERROR',
         eventKafka: 'UP',
       }).kafka,
@@ -129,7 +128,7 @@ describe('deriveTopology', () => {
   });
 
   it('둘 다 응답이 없으면 게이트웨이부터 의심', () => {
-    expect(deriveTopology({ monolith: 'ERROR', event: 'ERROR' }).gateway).toBe('DOWN');
+    expect(deriveTopology({ core: 'ERROR', event: 'ERROR' }).gateway).toBe('DOWN');
   });
 });
 

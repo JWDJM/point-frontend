@@ -1,5 +1,5 @@
 import { Card } from '@/shared/ui/Card';
-import { useEventServiceInfo, useMonolithInfo } from '../api/useSystemInfo';
+import { useEventServiceInfo, useCoreServiceInfo } from '../api/useSystemInfo';
 import { MapNode } from './MapNode';
 import {
   deriveTopology,
@@ -12,7 +12,7 @@ import styles from './system.module.css';
 const NODES: Record<TopologyNode, { x: number; y: number; title: string; sub: string }> = {
   browser: { x: 16, y: 123, title: '브라우저', sub: 'React SPA' },
   gateway: { x: 196, y: 123, title: 'ALB / Gateway', sub: '로컬: Vite proxy' },
-  monolith: { x: 396, y: 40, title: 'monolith', sub: '/api/** · :8080' },
+  core: { x: 396, y: 40, title: 'core-service', sub: '/api/** · :8080' },
   event: { x: 396, y: 206, title: 'event-service', sub: '/api/events/** · :8081' },
   database: { x: 640, y: 40, title: 'PostgreSQL', sub: 'RDS / Cloud SQL' },
   kafka: { x: 640, y: 123, title: 'Kafka', sub: 'MSK · reward 토픽' },
@@ -29,11 +29,11 @@ interface Edge {
 
 const EDGES: Edge[] = [
   { d: 'M166 154 L196 154', from: 'browser', to: 'gateway' },
-  { d: 'M346 146 C372 146 370 71 396 71', from: 'gateway', to: 'monolith' },
+  { d: 'M346 146 C372 146 370 71 396 71', from: 'gateway', to: 'core' },
   { d: 'M346 162 C372 162 370 237 396 237', from: 'gateway', to: 'event' },
   {
     d: 'M546 71 L640 71',
-    from: 'monolith',
+    from: 'core',
     to: 'database',
     label: { x: 556, y: 64, text: 'SQL (원장)' },
   },
@@ -53,7 +53,7 @@ const EDGES: Edge[] = [
   {
     d: 'M660 123 C660 108 540 122 520 102',
     from: 'kafka',
-    to: 'monolith',
+    to: 'core',
     async: true,
     label: { x: 552, y: 128, text: '소비 → 원장' },
   },
@@ -64,16 +64,16 @@ const reach = (q: { isError: boolean; data?: { kind: string } }): ServiceReach =
 
 /** 요청이 실제로 흐르는 경로와 각 구간의 실시간 상태 */
 export function ArchitectureMap() {
-  const mono = useMonolithInfo();
+  const core = useCoreServiceInfo();
   const evt = useEventServiceInfo();
   // 폴링이 실패해도 TanStack Query 는 이전 data 를 유지한다 → 에러 중에는 이전 점검 값을 쓰지 않는다
-  const monoInfo = !mono.isError && mono.data?.kind === 'OK' ? mono.data.info : undefined;
+  const coreInfo = !core.isError && core.data?.kind === 'OK' ? core.data.info : undefined;
   const evtInfo = !evt.isError && evt.data?.kind === 'OK' ? evt.data.info : undefined;
 
   const states = deriveTopology({
-    monolith: reach(mono),
-    database: monoInfo?.database.status,
-    monolithKafka: monoInfo?.kafka.status,
+    core: reach(core),
+    database: coreInfo?.database.status,
+    coreKafka: coreInfo?.kafka.status,
     event: reach(evt),
     redis: evtInfo?.redis.status,
     eventKafka: evtInfo?.kafka.status,
