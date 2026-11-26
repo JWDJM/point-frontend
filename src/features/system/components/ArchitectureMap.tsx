@@ -15,8 +15,7 @@ const NODES: Record<TopologyNode, { x: number; y: number; title: string; sub: st
   core: { x: 396, y: 40, title: 'core-service', sub: '/api/** · :8080' },
   event: { x: 396, y: 206, title: 'event-service', sub: '/api/events/** · :8081' },
   database: { x: 640, y: 40, title: 'PostgreSQL', sub: 'RDS / Cloud SQL' },
-  kafka: { x: 640, y: 123, title: 'Kafka', sub: 'MSK · reward 토픽' },
-  redis: { x: 640, y: 206, title: 'Redis', sub: 'ElastiCache · Lua' },
+  redis: { x: 640, y: 206, title: 'Redis', sub: 'ElastiCache · Lua · Stream' },
 };
 
 interface Edge {
@@ -41,21 +40,14 @@ const EDGES: Edge[] = [
     d: 'M546 237 L640 237',
     from: 'event',
     to: 'redis',
-    label: { x: 560, y: 254, text: 'Lua 판정' },
+    label: { x: 552, y: 254, text: 'Lua 판정 + 기록' },
   },
   {
-    d: 'M546 222 C592 222 594 154 640 154',
-    from: 'event',
-    to: 'kafka',
-    async: true,
-    label: { x: 598, y: 206, text: '보상 발행' },
-  },
-  {
-    d: 'M660 123 C660 108 540 122 520 102',
-    from: 'kafka',
+    d: 'M680 206 C680 150 540 130 520 102',
+    from: 'redis',
     to: 'core',
     async: true,
-    label: { x: 552, y: 128, text: '소비 → 원장' },
+    label: { x: 600, y: 150, text: 'Stream 소비 → 원장' },
   },
 ];
 
@@ -73,10 +65,9 @@ export function ArchitectureMap() {
   const states = deriveTopology({
     core: reach(core),
     database: coreInfo?.database.status,
-    coreKafka: coreInfo?.kafka.status,
+    coreStream: coreInfo?.rewardStream.status,
     event: reach(evt),
     redis: evtInfo?.redis.status,
-    eventKafka: evtInfo?.kafka.status,
   });
 
   const ids = Object.keys(NODES) as TopologyNode[];
@@ -149,7 +140,7 @@ export function ArchitectureMap() {
           <span className={styles.swatchLine} /> 동기 호출
         </span>
         <span className={styles.legendItem}>
-          <span className={styles.swatchDashed} /> 비동기 (Kafka)
+          <span className={styles.swatchDashed} /> 비동기 (Redis Stream)
         </span>
         <span>테두리 색 = 상태 · 빨간 화살표 = 끊긴 구간</span>
       </div>

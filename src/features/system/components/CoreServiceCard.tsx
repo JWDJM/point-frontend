@@ -28,9 +28,10 @@ export function CoreServiceCard() {
   );
 
   const db = info?.database;
-  const kafka = info?.kafka;
+  const stream = info?.rewardStream;
   const lag = detailNumber(db?.details, 'heartbeatLagSeconds');
-  const consumerLag = detailNumber(kafka?.details, 'consumerLag');
+  const pending = detailNumber(stream?.details, 'pending');
+  const dlq = detailNumber(stream?.details, 'dlqLength');
 
   return (
     <Card title="core-service" subtitle="포인트 · 사용자 · :8080" action={head}>
@@ -40,7 +41,7 @@ export function CoreServiceCard() {
           연결할 수 없음 — 포인트 조회·결제 중단
         </div>
       )}
-      {info && db && kafka && (
+      {info && db && stream && (
         <>
           <InstanceSummary instance={info.instance} />
           <div className={styles.components}>
@@ -80,25 +81,37 @@ export function CoreServiceCard() {
               ]}
             />
             <ComponentPanel
-              name="Kafka (원장 반영 컨슈머)"
-              status={kafka}
+              name="Redis Stream (원장 반영 consumer)"
+              status={stream}
               rows={[
-                { label: '브로커', value: detailNumber(kafka.details, 'brokers') },
                 {
                   label: '컨슈머 그룹',
                   value: (
                     <span className={styles.mono}>
-                      {detailString(kafka.details, 'consumerGroup')}
+                      {detailString(stream.details, 'consumerGroup')}
                     </span>
                   ),
                 },
-                { label: '할당 파티션', value: detailNumber(kafka.details, 'assignedPartitions') },
+                { label: '보상 Stream', value: detailNumber(stream.details, 'streams') },
                 {
-                  label: '미반영 메시지 (lag)',
+                  label: '보관 중 항목 (7일)',
+                  value: detailNumber(stream.details, 'length')?.toLocaleString('ko-KR'),
+                },
+                {
+                  label: '반영 대기 (pending)',
                   value:
-                    consumerLag == null ? undefined : (
-                      <Badge tone={consumerLag === 0 ? 'good' : 'warning'}>
-                        {consumerLag.toLocaleString('ko-KR')}건
+                    pending == null ? undefined : (
+                      <Badge tone={pending === 0 ? 'good' : 'warning'}>
+                        {pending.toLocaleString('ko-KR')}건
+                      </Badge>
+                    ),
+                },
+                {
+                  label: 'DLQ',
+                  value:
+                    dlq == null ? undefined : (
+                      <Badge tone={dlq === 0 ? 'good' : 'critical'}>
+                        {dlq.toLocaleString('ko-KR')}건
                       </Badge>
                     ),
                 },

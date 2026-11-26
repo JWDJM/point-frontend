@@ -39,7 +39,7 @@ export function LedgerOverview() {
               hint={
                 data.lastEventRewardAt
                   ? new Date(data.lastEventRewardAt).toLocaleTimeString('ko-KR')
-                  : 'Kafka 소비 기록 없음'
+                  : 'Stream 소비 기록 없음'
               }
             />
           </div>
