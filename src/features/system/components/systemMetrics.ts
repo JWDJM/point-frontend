@@ -73,9 +73,9 @@ export function heartbeatTone(lagSeconds: number | null | undefined): Tone {
 export type ServiceReach = 'LOADING' | 'OK' | 'ERROR' | 'MAINTENANCE';
 
 export interface TopologyInput {
-  monolith: ServiceReach;
+  core: ServiceReach;
   database?: string;
-  monolithKafka?: string;
+  coreKafka?: string;
   event: ServiceReach;
   redis?: string;
   eventKafka?: string;
@@ -84,7 +84,7 @@ export interface TopologyInput {
 export type TopologyNode =
   | 'browser'
   | 'gateway'
-  | 'monolith'
+  | 'core'
   | 'event'
   | 'database'
   | 'kafka'
@@ -97,19 +97,19 @@ const asState = (s: string | undefined): ComponentState =>
 export function deriveTopology(t: TopologyInput): Record<TopologyNode, ComponentState> {
   const service = (r: ServiceReach): ComponentState =>
     r === 'OK' ? 'UP' : r === 'ERROR' ? 'DOWN' : r === 'MAINTENANCE' ? 'MAINTENANCE' : 'UNKNOWN';
-  const reached = [t.monolith, t.event].some((r) => r === 'OK' || r === 'MAINTENANCE');
-  const bothFailed = t.monolith === 'ERROR' && t.event === 'ERROR';
-  // Kafka 는 발행 측(event-service) 점검을 우선, 없으면 소비 측(monolith) 점검 결과.
+  const reached = [t.core, t.event].some((r) => r === 'OK' || r === 'MAINTENANCE');
+  const bothFailed = t.core === 'ERROR' && t.event === 'ERROR';
+  // Kafka 는 발행 측(event-service) 점검을 우선, 없으면 소비 측(core-service) 점검 결과.
   // 응답이 끊긴 서비스의 (이전) 점검 값은 쓰지 않는다 → 둘 다 끊기면 확인 불가
   const eventKafka = t.event === 'OK' ? t.eventKafka : undefined;
-  const monolithKafka = t.monolith === 'OK' ? t.monolithKafka : undefined;
-  const kafka = eventKafka ? asState(eventKafka) : asState(monolithKafka);
+  const coreKafka = t.core === 'OK' ? t.coreKafka : undefined;
+  const kafka = eventKafka ? asState(eventKafka) : asState(coreKafka);
   return {
     browser: 'UP',
     gateway: reached ? 'UP' : bothFailed ? 'DOWN' : 'UNKNOWN',
-    monolith: service(t.monolith),
+    core: service(t.core),
     event: service(t.event),
-    database: t.monolith === 'OK' ? asState(t.database) : 'UNKNOWN',
+    database: t.core === 'OK' ? asState(t.database) : 'UNKNOWN',
     kafka,
     redis: t.event === 'OK' ? asState(t.redis) : t.event === 'MAINTENANCE' ? 'DISABLED' : 'UNKNOWN',
   };
