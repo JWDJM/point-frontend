@@ -500,7 +500,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** 이벤트 현황 (local 프로필 전용 — 운영에서는 404) */
+    /** 이벤트 현황 (인증 없음). 없는 id 면 open=false, 수치 0 */
     get: {
       parameters: {
         query?: never;
@@ -540,7 +540,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** 이벤트 열기/초기화 (local 프로필 전용) */
+    /** 이벤트 열기/초기화 (local 프로필 전용 — 운영에서는 404). 참여자·당첨자를 지우고 마감 없이 다시 연다. 운영 생성은 POST /api/events/admin/{eventId} */
     post: {
       parameters: {
         query?: {
@@ -562,6 +562,79 @@ export interface paths {
           };
           content: {
             'application/json': components['schemas']['EventStatusResponse'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/events/admin/{eventId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 운영용 이벤트 생성 (X-Admin-Token, event-day 런북 전용 — 프론트에서 호출하지 않는다)
+     * @description - 한 번 쓴 eventId 는 다시 쓸 수 없다 (409). 같은 id 를 다시 열면 멱등키(eventId:userId)가 겹쳐 새 당첨이 원장에서 무시되기 때문
+     *     - endsAt 이 지나면 참여 마감 (answers → 410 CLOSED). 이벤트 키는 endsAt + 1일에 만료 (ADR-0007), 보상 Stream 은 만료되지 않는다 (ADR-0019)
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['CreateEventRequest'];
+        };
+      };
+      responses: {
+        /** @description 생성 (code=CREATED) */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['EventStatusResponse'];
+          };
+        };
+        /** @description 입력 오류 (code=INVALID_REQUEST) — stock·amount 는 1 이상, endsAt 은 미래 시각 */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+        /** @description 토큰 없음·불일치, 또는 서버에 ADMIN_API_TOKEN 미설정 (code=FORBIDDEN) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+        /** @description 이미 사용한 eventId (code=EVENT_ALREADY_EXISTS) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
           };
         };
       };
@@ -915,7 +988,29 @@ export interface components {
         participants: number;
         /** Format: int64 */
         winners: number;
+        /**
+         * Format: date-time
+         * @description 참여 마감 시각 (UTC). local open 이벤트는 null (마감 없음)
+         */
+        endsAt?: string | null;
       };
+    };
+    CreateEventRequest: {
+      /**
+       * Format: int64
+       * @description 당첨 수량
+       */
+      stock: number;
+      /**
+       * Format: int64
+       * @description 당첨 시 지급 포인트
+       */
+      amount: number;
+      /**
+       * Format: date-time
+       * @description 참여 마감 시각 (미래, 예: 2026-12-01T12:00:00+09:00)
+       */
+      endsAt: string;
     };
     InstanceInfo: {
       /** @example core-service */
