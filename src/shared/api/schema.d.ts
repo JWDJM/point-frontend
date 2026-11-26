@@ -624,7 +624,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** core-service 인스턴스·DB·Kafka 상태 (운영/인프라 검증용, OPS_API_ENABLED=false 면 비활성) */
+    /** core-service 인스턴스·DB·원장 반영 Stream 상태 (운영/인프라 검증용, OPS_API_ENABLED=false 면 비활성) */
     get: {
       parameters: {
         query?: never;
@@ -771,7 +771,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** event-service 인스턴스·Redis·Kafka 상태 (ALB 경로 라우팅을 그대로 탐 / DR 모드에서는 503 EVENT_MAINTENANCE) */
+    /** event-service 인스턴스·Redis 상태 (ALB 경로 라우팅을 그대로 탐 / DR 모드에서는 503 EVENT_MAINTENANCE) */
     get: {
       parameters: {
         query?: never;
@@ -924,7 +924,8 @@ export interface components {
       instance: string;
       profiles: string[];
       drMode: boolean;
-      kafkaEnabled: boolean;
+      /** @description 원장 반영 Redis Stream 사용 여부 (core-service: DR 모드면 false, ADR-0019) */
+      rewardStreamEnabled: boolean;
       /** Format: date-time */
       startedAt: string;
       /** Format: int64 */
@@ -943,9 +944,8 @@ export interface components {
       /**
        * @description 구성요소별 정보.
        *     database: version, database, serverAddress, inRecovery, heartbeatAt, heartbeatLagSeconds
-       *     redis: ping, pingMs, version, mode, role, connectedClients, usedMemory, keys
-       *     kafka(core-service): clusterId, brokers, topic, consumerGroup, assignedPartitions, consumerLag
-       *     kafka(event-service): clusterId, brokers, topic, topicExists, partitions, publishedOffsetTotal
+       *     redis(event-service): ping, pingMs, version, mode, role, connectedClients, usedMemory, keys, rewardStreams
+       *     rewardStream(core-service): consumerGroup, streams, length, pending, dlqLength
        */
       details: {
         [key: string]: unknown;
@@ -957,7 +957,7 @@ export interface components {
       data?: {
         instance: components['schemas']['InstanceInfo'];
         database: components['schemas']['ComponentStatus'];
-        kafka: components['schemas']['ComponentStatus'];
+        rewardStream: components['schemas']['ComponentStatus'];
       };
     };
     EventSystemInfoResponse: {
@@ -965,7 +965,6 @@ export interface components {
       data?: {
         instance: components['schemas']['InstanceInfo'];
         redis: components['schemas']['ComponentStatus'];
-        kafka: components['schemas']['ComponentStatus'];
       };
     };
     LedgerActivity: {
@@ -1030,7 +1029,7 @@ export interface components {
     /**
      * @description 이벤트 일시 불가. code 로 구분한다.
      *     - EVENT_MAINTENANCE: DR 모드 점검 (Gateway → maintenance 응답, ADR-0004·0014)
-     *     - EVENT_RETRY: 보상 발행 실패. 참여 기록은 되돌려졌으므로 잠시 후 같은 요청을 다시 보내면 된다
+     *     - EVENT_RETRY: Redis 연결 실패·타임아웃. 판정과 보상 기록은 한 Lua 스크립트라 둘 중 하나만 남지 않는다. 잠시 후 같은 요청을 다시 보내면 되고, 재시도가 409 면 이미 처리된 것이다 (ADR-0019)
      */
     EventUnavailable: {
       headers: {

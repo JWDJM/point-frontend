@@ -3,7 +3,7 @@ import { apiClient, ERROR_CODES } from '@/shared/api/client';
 
 export type AnswerResult = 'WON' | 'LOST' | 'DUPLICATE' | 'CLOSED' | 'MAINTENANCE';
 
-/** HTTP 상태 → 화면 상태. 202 당첨은 "지급 예정" (원장 반영은 Kafka 경유 비동기) */
+/** HTTP 상태 → 화면 상태. 202 당첨은 "지급 예정" (원장 반영은 Redis Stream 경유 비동기) */
 export function toAnswerResult(status: number, errorCode?: string): AnswerResult {
   switch (status) {
     case 202:
