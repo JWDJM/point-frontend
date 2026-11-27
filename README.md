@@ -8,7 +8,7 @@
 ## 로컬 실행
 ```bash
 npm install
-npm run dev               # http://localhost:5173  (백엔드 8080/8081 이 떠 있어야 함)
+npm run dev               # http://localhost:5173  (백엔드 core-service 8080 · event-service 8081 · point-query 8083 이 떠 있어야 함)
 npm run gen:api           # point-backend 가 형제 폴더에 있어야 함 (다른 경로: npx openapi-typescript <path> -o src/shared/api/schema.d.ts)
 ```
 
@@ -18,7 +18,13 @@ npm run gen:api           # point-backend 가 형제 폴더에 있어야 함 (�
 | `gen:api` | OpenAPI → `src/shared/api/schema.d.ts` |
 
 ## 로컬 연결 방식
-- `vite.config.ts` proxy: `/api/events/**` → `:8081`, 나머지 `/api/**` → `:8080` (운영 ALB 경로 라우팅과 동일, CORS 불필요)
+- `vite.config.ts` proxy (운영 HTTPRoute 경로 규칙과 동일, CORS 불필요 — point-infra ADR-0024)
+  | 경로 | 포트 |
+  |---|---|
+  | `/api/events/**` | event-service `:8081` |
+  | `/api/points/use` | core-service `:8080` (point-command 전환 전까지) |
+  | `/api/points/**`, `/api/health`, `/api/system/point-query/**` | point-query `:8083` |
+  | 그 외 `/api/**` | core-service `:8080` |
 - 인증: `/login`, `/signup`. access token 은 메모리에만(`src/shared/auth/session.ts`), refresh token 은 HttpOnly 쿠키. 새로고침 시 쿠키로 복원, 401 이면 재발급 후 1회 재시도 (`src/shared/api/client.ts`)
 - 로컬 데모 계정: `demo1~5@point.local` / `demo1234!`
 
